@@ -1,55 +1,61 @@
-import React, { Component } from 'react';
-import ShowTodos from './components/ShowTodos';
-import AddTodo from './components/AddTodo';
+import React, { Component } from "react";
+import ShowTodos from "./components/ShowTodos";
+import AddTodo from "./components/AddTodo";
+import axios from "axios";
 
 class TodoApp extends Component {
   constructor() {
     super();
     this.state = {
-      todo: '',
-      todos: ['']
+      todo: "",
+      todos: [""]
     };
   }
 
-  clearInput = () => {
-    this.setState({ todo: '' });
-  }
+  getTodos = () => {
+    axios.get("/todos").then(res => {
+      this.setState({
+        todos: res.data.todos
+      });
+    });
+  };
 
-  addTodo = () => {
-    const nextTodos = Array.from(this.state.todos); 
-    nextTodos.push(this.state.todo);
-    this.setState({ todos: nextTodos });
+  addTodo = e => {
+    axios.post(`/todos/${this.state.todo}`);
+    this.getTodos();
     this.clearInput();
-  }
+  };
 
-  removeTodo = (index) => {
-    const nextTodos = Array.from(this.state.todos);
-    nextTodos.splice(index, 1);
-    this.setState({ todos: nextTodos });
-  }
+  clearInput = () => {
+    this.setState({ todo: "" });
+  };
 
-  handleChange = (e) => {
+  removeTodo = index => {
+    axios.delete(`/todos/${index}`).then(this.getTodos);
+  };
+
+  handleChange = e => {
     this.setState({
       todo: e.target.value
     });
+  };
+
+  componentDidMount() {
+    this.getTodos();
   }
 
   render() {
     return (
       <div>
-        <AddTodo 
+        <AddTodo
           handleChange={this.handleChange}
           addTodo={this.addTodo}
           todo={this.state.todo}
         />
-        <ShowTodos 
-          todos={this.state.todos}
-          removeTodo={this.removeTodo}
-        />
+        <ShowTodos todos={this.state.todos} removeTodo={this.removeTodo} />
       </div>
     );
   }
 }
-
 
 export default TodoApp;
